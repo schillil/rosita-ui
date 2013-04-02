@@ -1,0 +1,81 @@
+html {
+	min-height: 100%;
+	font-family: Verdana;
+	font-size: 10pt;
+}
+
+img {
+	border: none;	
+}
+
+.anchor {color: blue; text-decoration: underline; cursor: pointer}
+
+div.stepstatus { text-align: left; background-color: #EEE; border: 1px solid #DDD; margin: 32px 16px; border-radius: 16px; padding: 8px; width: 600px; }
+div.stepicon {line-height: 32px; background-repeat: no-repeat; background-position: 2px 50%; padding-left:48px; font-size: 16pt; font-weight: bold;}
+div.stepmessage {font-size: 10pt; padding-left: 48px}
+.stepicon.running { background-image: url("../images/icons/ajax-loader.gif"); }
+.stepicon.success { background-image: url("../images/icons/check.png"); }
+.stepicon.failed { background-image: url("../images/icons/close_delete_2.png"); }
+.stepicon.play { background-image: url("../images/icons/play.png"); }
+/*.stepicon.play:hover { background-image: url("../images/icons/playhi.png"); cursor: pointer; }*/
+.stepicon.skipped { background-image: url("../images/icons/skipped.png"); }
+.stepicon.paused { background-image: url("../images/icons/pause.png"); }
+.stepicon.search { background-image: url("../images/icons/detail.png"); }
+.stepicon.save { background-image: url("../images/icons/save_as.png"); }
+
+.stepicon.restart { background-image: url("../images/icons/refresh.png"); cursor: pointer; }
+.stepicon.restart:hover { background-image: url("../images/icons/refreshhi.png"); cursor: pointer; }
+
+.stepicon.back { background-image: url("../images/icons/arrow_left.png"); cursor: pointer; }
+
+div.progressbarborder {border: 1px solid; width: 540px; height: 10px}
+div.progressbar {margin: 1px; height: 8px}
+.progressbartable {font-size: 8pt; font-weight: bold;}
+
+div.bigbutton { background-color: #EEE; border: 1px solid #DDD; margin: 32px 16px; border-radius: 16px; padding: 8px; width: 200px; }
+
+div#login { background-color: #EEE; border: 1px solid #DDD; margin: 32px 16px; border-radius: 16px; padding: 8px; width: 300px; }
+div.fheader { font-size: 16pt; font-weight: bold; }
+.loginLabel {line-height: 20px; font-weight: bold; }
+.loginfield {width: 100%; }
+.loginmessage {font-style: italic; }
+
+table.striped { font-size: 10pt; }
+table.striped > thead > tr > th { font-weight: bold; background-color: #DDD }
+table.striped > tbody > tr > td { padding: 8px; background-color: #F0F0F0 }
+table.striped > tbody > tr > td.even { padding: 8px; background-color: #F8F8F8 }
+
+.errorbox {text-align: left; padding: 8px; background-color: #EEE; border: 1px solid #DDD}
+.flashmessage {border: 1px solid #44F; background-color: #EEF; padding: 8px; }
+
+a {
+	text-decoration: none;
+	color: black;	
+	
+}
+
+a.step {
+	padding: 4px;
+	border: 1px solid #CCF;
+	margin: 4px;
+	border-radius: 4px;
+}
+
+span.currentStep {
+	padding: 4px;
+	border: 1px solid #CCF;
+	background-color: #DDF;
+	margin: 4px;
+	border-radius: 4px;
+}
+
+a.nextLink,a.prevLink {
+	padding: 4px;
+	border: 1px solid #CCF;
+	margin: 4px;
+	border-radius: 4px;
+}
+
+.texttiny {
+	font-size: 7pt;	
+}
