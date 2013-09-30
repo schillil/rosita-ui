@@ -20,15 +20,21 @@ class WorkflowTitle {
 	
 	Long id
 	String title
+	Integer stepNumber
+	String handler
+	String initialState
+	Integer nextStep
 
 	static mapping = {
 		table 'cz.cz_workflow_title'
 		version false
 		columns {
-			id column: 'title_id'
+			id column: 'title_id', generator: 'sequence', params:[sequence:'cz.cz_sq']
 		}
 	}
 	
     static constraints = {
+		handler(nullable: true)
+		nextStep(nullable: true)
     }
 }

@@ -16,6 +16,8 @@
 
 package com.recomdata.grails.domain
 
+import edu.ucdenver.rosita.RositaParser;
+
 class UserController {
 
 	def authenticateService;
@@ -39,6 +41,16 @@ class UserController {
 		[person:person]
 	}
 
+    def importCohortData = {
+      	def cohortImportResult = RositaParser.importCohortDataUI()
+        if(cohortImportResult){
+           flash.message = "Import Cohort data done"	
+        }else{
+           flash.message = "Import Cohort data failed"	
+        }
+        redirect(controller: 'utils',action: 'about')
+    }
+
 	def update = {
 		def person = Person.get(params.id)
 		if (!person) {
@@ -46,7 +58,6 @@ class UserController {
 			return
 		}
 				
-		person.properties = params
 		
 		if (!params.password.equals(params.passwordconfirm)) {
 			flash.message = "Passwords did not match!"
@@ -58,13 +69,14 @@ class UserController {
 			render(view: 'edit', model: [person:person]);
 			return;
 		}
-				
+
+		person.properties = params
 		person.password = authenticateService.encodePassword(params.password)
 		
 		if (!person.hasErrors() && person.save()) {
 			// sync up roles
 			flash.message = "Updated login"
-			redirect(controller: 'rositaJob', action: 'index');
+			redirect(controller: 'utils', action: 'about');
 		} else {
 			render(view: 'edit', model: [person:person]);
 		}

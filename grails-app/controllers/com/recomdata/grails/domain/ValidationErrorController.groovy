@@ -16,6 +16,8 @@
 
 package com.recomdata.grails.domain
 
+import au.com.bytecode.opencsv.CSVWriter
+
 
 class ValidationErrorController {
 	
@@ -29,13 +31,17 @@ class ValidationErrorController {
 		}
 		controllerReturn = session.getAttribute(FILTER_SESSION_KEY)
 		
-		def job = WorkflowStep.get(params.id).job;
+		def job = WorkflowStepInstance.get(params.id).job;
 		
 		def offset = (params.int('offset') ?: 0)
 		def max = (params.int('max') ?: 50)
 		def errors = ValidationError.createCriteria().list([max: max, offset: offset]) {
 			eq('stepId', params.long('id'));
-			order('datetime', 'asc');
+			
+			and {
+				order('datetime', 'asc');
+				order('lineNumber', 'asc');
+			}
 		}
 		
 		[errors: errors, errorCount: errors.getTotalCount(), id: params.long('id'), max: max, offset: offset, from: controllerReturn, jobId: job.id]
@@ -44,20 +50,24 @@ class ValidationErrorController {
 	def export = {
 		def errors = ValidationError.createCriteria().list() {
 			eq('stepId', params.long('id'));
-			order('datetime', 'asc');
+			and {
+				order('datetime', 'asc');
+				order('lineNumber', 'asc');
+			}
 		}
-		
-		String lineSeparator = System.getProperty('line.separator')
 		
 		response.setHeader('Content-disposition', 'attachment; filename=validationerrors' + params.id + '.csv')
 		response.contentType = 'text/plain'
 		
-		render(text: "Type,Object,Line,Date,Message")
-		render(text: lineSeparator)
+		String lineSeparator = System.getProperty('line.separator')
+		CSVWriter csv = new CSVWriter(response.writer)
+		
+		String[] head = ["Clinic ID", "Clinic Name", "Type", "Object", "Line", "Date", "Message"]
+		csv.writeNext(head)
 		for (error in errors) {
-			//TODO Change to openCsv
-			render(text: error.errorType + "," + error.sourceType + "," + error.lineNumber + "," + error.datetime + "," + error.message)
-			render(text: lineSeparator)
+			String[] vals = [error.mcDataSource?.id, error.mcDataSource?.dataSourceName, error.errorType, error.sourceType, error.lineNumber, error.datetime, error.message]
+			csv.writeNext(vals)
 		}
+		csv.close()
 	}
 }

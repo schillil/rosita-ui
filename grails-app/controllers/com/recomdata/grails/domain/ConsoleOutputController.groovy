@@ -28,9 +28,13 @@ class ConsoleOutputController {
 		
 		if (!lines) {
 			render(contentType:'text/plain',text:"No output for this step");
+			return
 		}
+		
+		def format = "%-80s | %s"
+		
 		for (line in lines) {
-			render(contentType:'text/plain',text:line.message + "\n");
+			render(contentType:'text/plain',text:String.format(format, line.message, line.date) + "\n");
 		}
 	}
 }

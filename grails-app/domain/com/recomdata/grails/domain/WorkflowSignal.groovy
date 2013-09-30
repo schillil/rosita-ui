@@ -19,15 +19,14 @@ package com.recomdata.grails.domain
 class WorkflowSignal {
 	
 	Long id
-	RositaJob job
-	Integer workflowStep
-	Date date
+	WorkflowStepInstance step
+	Date signalDate
 	Boolean pending
 	Boolean success
 	String message
 
 	static mapping = {
-		table 'cz.cz_workflow_signal'
+		table 'cz.signal'
 		version false
 		columns {
 			id column: 'signal_id'
@@ -38,5 +37,5 @@ class WorkflowSignal {
 		message (nullable: true, maxSize: 255)
     }
 	
-	static belongsTo = RositaJob
+	static belongsTo = WorkflowStepInstance
 }

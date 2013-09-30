@@ -28,6 +28,7 @@ class ConceptMap {
 	String mapped
 	String empty
 	Long sourceCount
+	Long dataSourceId
 
 	static mapping = {
 		table 'cz.cz_concept_map'
@@ -36,6 +37,7 @@ class ConceptMap {
 			id column: 'concept_map_id'
 			mapped column: 'is_mapped'
 			empty column: 'is_empty'
+			dataSourceId column: 'x_data_source_id'
 		}
 	}
 	

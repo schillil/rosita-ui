@@ -16,6 +16,8 @@
 
 package com.recomdata.grails.domain
 
+import java.util.Date;
+
 class ValidationError {
 	
 	Long id
@@ -28,15 +30,17 @@ class ValidationError {
 	String sourceType
 	String filename
 	Long stepId
+	MultiClinicDataSource mcDataSource
 
 	static mapping = {
 		table 'cz.cz_xml_error_log'
 		version false
 		columns {
 			id column: 'xml_error_log_id'
+			mcDataSource column: 'data_source_id'
 		}
 	}
 	
-    static constraints = {
-    }
+	static constraints = {
+	}
 }

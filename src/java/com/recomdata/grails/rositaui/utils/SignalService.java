@@ -65,23 +65,22 @@ public class SignalService implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		ds = new DriverManagerDataSource(dbUrl, dbUsername, dbPassword);
-		ps = ds.getConnection().prepareStatement("INSERT INTO cz.cz_workflow_signal(job_id, workflow_step, date, pending, success, message) VALUES (?, ?, ?, ?, ?, ?);");
-		consolePs = ds.getConnection().prepareStatement("INSERT INTO cz.cz_console_output(step_id, date, message) VALUES (?,?,?)");
+		ps = ds.getConnection().prepareStatement("INSERT INTO cz.signal(step_id, signal_date, pending, success, message) VALUES (?, ?, ?, ?, ?);");
+		consolePs = ds.getConnection().prepareStatement("INSERT INTO cz.log(job_id, step_id, message_type, message, error_code, log_date) VALUES (?,?,?,?,?,?)");
 		me = this;
 	}
 	
-	public void sendSignal(Long jobId, Integer workflowStep, boolean success) {
-		sendSignal(jobId, workflowStep, success, "");
+	public void sendSignal(Long stepId, boolean success) {
+		sendSignal(stepId, success, "");
 	}
 		
-	public void sendSignal(Long jobId, Integer workflowStep, boolean success, String message) {
+	public void sendSignal(Long stepId, boolean success, String message) {
 		try {
-			ps.setLong(1, jobId);
-			ps.setLong(2, workflowStep);
-			ps.setTimestamp(3, new Timestamp(new java.util.Date().getTime()));
-			ps.setBoolean(4, true);
-			ps.setBoolean(5, success);
-			ps.setString(6, message);
+			ps.setLong(1, stepId);
+			ps.setTimestamp(2, new Timestamp(new java.util.Date().getTime()));
+			ps.setBoolean(3, true);
+			ps.setBoolean(4, success);
+			ps.setString(5, message);
 			ps.execute();
 		}
 		catch (SQLException e) {
@@ -89,11 +88,19 @@ public class SignalService implements InitializingBean {
 		}
 	}
 	
-	public void sendConsole(Long stepId, String message) {
+	public void sendConsole(Long jobId, Long stepId, String message) {
+		sendConsole(jobId, stepId, message, "STATUS");
+	}
+	
+	public void sendConsole(Long jobId, Long stepId, String message, String status) {
 		try {
-			consolePs.setLong(1, stepId);
-			consolePs.setTimestamp(2, new Timestamp(new java.util.Date().getTime()));
-			consolePs.setString(3, message);
+			consolePs.setLong(1, jobId);
+			consolePs.setLong(2, stepId);
+			consolePs.setString(3, status);
+			consolePs.setString(4, message);
+			consolePs.setString(5, "");
+			consolePs.setTimestamp(6, new Timestamp(new java.util.Date().getTime()));
+			
 			consolePs.execute();
 		}
 		catch (SQLException e) {

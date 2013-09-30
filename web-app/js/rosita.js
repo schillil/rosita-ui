@@ -3,8 +3,7 @@ var AJAX_TIMER = null;
 var JOB_ID = null;
 var UPDATE_FREQUENCY = 1000;
 
-function callAjax(element, url, params, big, callbackFunction) {
-	//clearAndShowWorking(element, '', big);
+function callAjax(element, url, params, callbackFunction) {
 	
 	request = $j.ajax({
 		url: url,
@@ -25,182 +24,109 @@ function callAjax(element, url, params, big, callbackFunction) {
 	
 }
 
-//Main update function... most of this has been standardized so is identical for each step
+function createWorkflowBox(id, title) {
+	
+	//Look at ALL workflow boxes, and if any are still apparently running, mark them as successful.
+	
+	$j('.stepstatus').each(function() {
+		var id = this.id;
+		var stepicon = $j('#' + id + ' .stepicon');
+		var stepmessage = $j('#' + id + ' .stepmessage');
+		if (stepicon.hasClass('running')) {
+			stepicon.removeClass('running');
+			stepicon.addClass('success');
+			stepmessage.empty();
+		}
+	});
+	
+	// Now create the box for the new step.
+	var newWorkflowBox = $j('<div/>', {
+	    id: 'stepstatus' + id,
+	    'class': 'stepstatus'
+	});
+	
+	newWorkflowBox.append($j('<div/>', {
+		id: 'stepicon' + id,
+		'class': 'stepicon running',
+		text: title
+	}));
+	
+	newWorkflowBox.append($j('<div/>', {
+		id: 'stepmessage' + id,
+		'class': 'stepmessage'
+	}));
+	
+	newWorkflowBox.append($j('<div/>', {
+		id: 'stepconsole' + id,
+		'class': 'stepconsole'
+	}));
+	
+	$j('#workflowSteps').append(newWorkflowBox);
+	newWorkflowBox.hide().fadeIn(1000);
+}
+
+//Main update function. When we get a status, show the appropriate template in the box for this workflow step.
+//If we do not have a box for this workflow step, create one.
 function updateScreen() {
 	request = $j.ajax({
 		url: '/rosita/rositaJob/status/' + JOB_ID,
-		type: 'POST',
-		data: {}
-	});
-	
-	request.fail(function(jqXHR, textStatus) {
-		alert(jqXHR.responseText);
-	});
-	
-	request.done(function(msg) {
-		if (msg['workflowStep'] == 1) {
-			if (msg['status'] == 'failed') {
-				showFailure(1);
-				getErrorDisplay(JOB_ID, 1, msg);
-				UPDATE = false;
-			}
-			else {
-				showRunning(1);
-				getStatusDisplay(JOB_ID, 1, msg);
-			}
-		}
-		if (msg['workflowStep'] == 2) {
-			$j('#stepmessage1').html("Files verified");
-			if (msg['status'] == 'failed') {
-				showFailure(2);
-				getErrorDisplay(JOB_ID, 2, msg);
-				UPDATE = false;
-			}
-			else {
-				showSuccess(1);
-				showRunning(2);
-				getStatusDisplay(JOB_ID, 2, msg);
-			}
-		}
-		if (msg['workflowStep'] == 3) {
-			$j('#stepmessage2').html("Validation complete");
-			if (msg['status'] == 'failed') {
-				showFailure(3);
-				getErrorDisplay(JOB_ID, 3, msg);
-				UPDATE = false;
-			}
-			else {
-				showSuccess(2);
-				showRunning(3);
-				getStatusDisplay(JOB_ID, 3, msg);
-			}
-		}
-		if (msg['workflowStep'] == 4) {
-			$j('#stepmessage3').html("Load complete");
-			if (msg['status'] == 'failed') {
-				showFailure(4);
-				getErrorDisplay(JOB_ID, 4, msg);
-				UPDATE = false;
-			}
-			else {
-				showSuccess(3);
-				showRunning(4);
-				getStatusDisplay(JOB_ID, 4, msg);
-			}
-		}
-		if (msg['workflowStep'] == 5) {
-			$j('#stepmessage4').html("Profiling complete");
-			if (msg['status'] == 'paused') {
-				showSuccess(4);
-				showPaused(5);
-				getPausedDisplay(JOB_ID, 5, msg);
-				UPDATE = false;
-			}
-		}
-		if (msg['workflowStep'] == 6) {
-			if (msg['status'] == 'failed') {
-				showFailure(6);
-				getErrorDisplay(JOB_ID, 6, msg);
-				UPDATE = false;
-			}
-			else if (msg['status'] == 'paused') {
-				showPaused(6);
-				getPausedDisplay(JOB_ID, 6, msg);
-				UPDATE = false;
-			}
-		}
-		if (msg['workflowStep'] == 7) {
-			if (msg['status'] == 'failed') {
-				showFailure(7);
-				getErrorDisplay(JOB_ID, 7, msg);
-				UPDATE = false;
-			}
-			else if (msg['status'] == 'paused') {
-				showPaused(7);
-				getPausedDisplay(JOB_ID, 7, msg);
-				UPDATE = false;
-			}
-			else {
-				showRunning(7);
-				getStatusDisplay(JOB_ID, 7, msg);
-			}
-		}
-		if (msg['workflowStep'] == 8) {
-			if (msg['status'] == 'failed') {
-				showFailure(8);
-				getErrorDisplay(JOB_ID, 8, msg);
-				UPDATE = false;
-			}
-			else {
-				if (!($j('#stepicon7').hasClass('skipped'))) {
-					showSuccess(7);
-					$j('#stepmessage7').html("Vocabulary import complete");
-				}
-				showRunning(8);
-				getStatusDisplay(JOB_ID, 8, msg);
-			}
-		}
-		if (msg['workflowStep'] == 9) {
-			$j('#stepmessage8').html("Processing complete");
-			if (msg['status'] == 'failed') {
-				showFailure(9);
-				getErrorDisplay(JOB_ID, 9, msg);
-				UPDATE = false;
-			}
-			else {
-				showSuccess(8);
-				showRunning(9);
-				getStatusDisplay(JOB_ID, 9, msg);				
-			}
-		}
-		if (msg['workflowStep'] == 10) {
-			$j('#stepmessage9').html("Profiling complete");
-			if (msg['status'] == 'paused') {
-				showSuccess(9);
-				showPaused(10);
-				getPausedDisplay(JOB_ID, 10, msg);
-				UPDATE = false;
-			}
-		}
-		if (msg['workflowStep'] == 11) {
-			if (msg['status'] == 'failed') {
-				showFailure(11);
-				getErrorDisplay(JOB_ID, 11, msg);
-				UPDATE = false;
-			}
-			else {
-				showRunning(11);
-				getStatusDisplay(JOB_ID, 11, msg);
-			}
-		}
-		if (msg['workflowStep'] == 12) {
-			$j('#stepmessage11').html("Publish complete");
-			if (msg['status'] == 'failed') {
-				showFailure(12);
-				getErrorDisplay(JOB_ID, 12, msg);
-				UPDATE = false;
-			}
-			else {
-				showSuccess(11);
-				showRunning(12);
-				getStatusDisplay(JOB_ID, 12, msg);
-			}
-		}
-		if (msg['workflowStep'] == 13) {
-			showSuccess(12);
-			showSuccess(13);
-			$j('#stepmessage12').html("Backup complete");
-			$j('#stepmessage13').html("Workflow complete!");
-			UPDATE = false;
-		}
+		type: 'GET',
+		data: {},
 		
-		if (UPDATE) {
-			startUpdating();
-		}
-		else {
-			AJAX_TIMER = null;
+		success: function(msg) {
+			var wfStep = msg['workflowStep'];
+			var stepId = msg['stepId'];
+			var status = msg['status'];
+			var previousStatus = msg['previousStepStatus'];
+			
+			if ($j('#stepstatus' + stepId).size() == 0) {
+				createWorkflowBox(stepId, workflowTitles[wfStep]);
+			}
+			
+			//Handle updates to this workflow step
+			if (status == 'failed' || status == 'dead') {
+				showStatus(stepId, status);
+				getErrorDisplay(JOB_ID, wfStep, msg, status);
+				UPDATE = false;
+			}
+			else if (status == 'paused') {
+				showStatus(stepId, status);
+				getPausedDisplay(JOB_ID, wfStep, msg);
+				UPDATE = false;
+			}
+			else if (status == 'completed') {
+				showStatus(stepId, 'success');
+				$j('#stepmessage' + stepId).html("Workflow complete!");
+				$j('#cancelButton').hide();
+				UPDATE = false;
+			}
+			else {
+				showStatus(stepId, status);
+				getStatusDisplay(JOB_ID, wfStep, msg);
+			}
+			
+			//Handle update to status of previous step
+			if (previousStatus != null) {
+				showStatus(stepId-1, previousStatus);
+				$j('#stepmessage' + (stepId-1)).html("");
+			}
+			
+			//Continue updating, if we should.
+			if (UPDATE) {
+				startUpdating();
+			}
+			else {
+				AJAX_TIMER = null;
+			}
+		},
+		
+		error: function(jqXHR, textStatus) {
+			if (jqXHR.responseText != null && jqXHR.responseText != "") {
+				alert(jqXHR.responseText);
+			}
 		}
 	});
+
 }
 
 function clearAndShowWorking(elementId, text, big) {
@@ -233,95 +159,63 @@ function clearAndShowWorking(elementId, text, big) {
 	}
 }
 
-function startJob(jobId) {
-	callAjax('nothing', '/rosita/rositaJob/start/' + JOB_ID, {}, false, startUpdating);
-	showRunning(1);
-	$j('#stepicon1').attr('onclick', '');
-	$j('#stepmessage1').html("Starting...");
-	$j('#stepmessage1').empty();
-}
-
-function restartJob(jobId) {
-	showRunning('restart');
-	$j('#stepiconrestart').attr('onclick', '');
-	window.location = '/rosita/rositaJob/restart/' + JOB_ID 
-}
-
 function cancelJob(jobId) {
-	showRunning('restart');
-	$j('#stepiconrestart').attr('onclick', '');
-	window.location = '/rosita/rositaJob/cancel/' + JOB_ID 
+	showStatus('cancel', 'running');
+	$j('#stepiconcancel').attr('onclick', '');
+	window.location = '/rosita/rositaJob/cancel/' + JOB_ID;
 }
 
 function resumeJob(jobId, stepId) {
-	callAjax('nothing', '/rosita/rositaJob/start/' + JOB_ID, {step: stepId}, false, startUpdating);
-	showRunning(stepId);
+	callAjax('nothing', '/rosita/rositaJob/start/' + JOB_ID, {}, startUpdating);
+	showStatus(stepId, 'running');
 	$j('#stepicon' + stepId).attr('onclick', '');
 	$j('#stepmessage' + stepId).html("Resuming...");
+}
+
+function runStep(jobId, stepId, targetStepNumber) {
+	callAjax('nothing', '/rosita/rositaJob/runStep/' + JOB_ID, {stepNumber: targetStepNumber}, startUpdating);
+	$j('#stepmessage' + stepId).html("Advancing...");
+}
+
+function rerunStep(jobId, stepId) {
+	callAjax('nothing', '/rosita/rositaJob/rerun/' + JOB_ID, {}, startUpdating);
+	$j('#stepmessage' + stepId).html("Restarting...");
 }
 
 function runImport(filename, stepId) {
 	if (filename == null || filename == '') {
 		return;
 	}
-	callAjax('nothing', '/rosita/rositaJob/runImport/' + JOB_ID, {filename: filename, stepId: stepId}, false, startUpdating);
-	showRunning(7);
-	$j('#stepicon7').attr('onclick', '');
-	$j('#stepmessage7').html("Importing...");
+	callAjax('nothing', '/rosita/rositaJob/unpauseStep/' + JOB_ID, {filename: filename, stepId: stepId}, startUpdating);
 }
 
-function confirmStep(jobId, stepNum, stepId) {
-	callAjax('nothing', '/rosita/rositaJob/confirm/' + JOB_ID, {wfStep: stepId, step: stepNum}, false, startUpdating);
-	showSuccess(stepNum);
-	showRunning(stepNum+1);
-	$j('#stepicon' + stepNum).attr('onclick', '');
-	$j('#stepmessage' + stepNum).html("Confirmed");
+function retryImport(filename, stepId) {
+	if (filename == null || filename == '') {
+		return;
+	}
+	callAjax('nothing', '/rosita/rositaJob/duplicateAndUnpauseStep/' + JOB_ID, {filename: filename, stepId: stepId}, startUpdating);
 }
 
-function unpauseStep(jobId, stepNum, stepId) {
-	callAjax('nothing', '/rosita/rositaJob/unpause/' + JOB_ID, {wfStep: stepId, step: stepNum}, false, startUpdating);
-	showRunning(stepNum);
-	$j('#stepicon' + stepNum).attr('onclick', '');
-	$j('#stepmessage' + stepNum).html("Starting...");
+function runBackup(stepId) {
+	callAjax('nothing', '/rosita/rositaJob/unpauseStep/' + JOB_ID, {stepId: stepId}, startUpdating);
 }
 
-function skipStep(jobId, stepNum, stepId) {
-	callAjax('nothing', '/rosita/rositaJob/skip/' + JOB_ID, {wfStep: stepId, step: stepNum}, false, startUpdating);
-	showSkipped(stepNum);
-	showRunning(stepNum+1);
-	$j('#stepicon' + stepNum).attr('onclick', '');
-	$j('#stepmessage' + stepNum).html("Skipped");
+function advanceStep(jobId, stepNum, stepId, outcome) {
+	callAjax('nothing', '/rosita/rositaJob/confirm/' + JOB_ID, {wfStep: stepId, step: stepNum, outcome: outcome}, startUpdating);
+	showStatus(stepId, outcome);
+	showStatus(stepId+1, 'running');
+	$j('#stepicon' + stepId).attr('onclick', '');
+	$j('#stepmessage' + stepId).html("");
+	createWorkflowBox(stepId+1, workflowTitles[workflowNext[stepNum]]);
 }
+
+function confirmStep(jobId, stepNum, stepId) { advanceStep (jobId, stepNum, stepId, 'success'); }
+function skipStep(jobId, stepNum, stepId) { advanceStep (jobId, stepNum, stepId, 'skipped'); }
+function ignoreErrorsForStep(jobId, stepNum, stepId) { advanceStep (jobId, stepNum, stepId, 'successwitherrors'); }
 
 function startUpdating() {
 	UPDATE = true;
 	AJAX_TIMER = setTimeout(function() {updateScreen();}, UPDATE_FREQUENCY);
-}
-
-function getBar(numerator, denominator, color, label) {
-	var html = "";
-	html += "<div class='progressbarborder' style='border-color: " + color + "'>";
-	var barwidth = Math.round((numerator*540)/denominator);
-	if (barwidth > 540) {barwidth = 540;}
-	if (denominator == 0) {barwidth = 0;}
-	html += "<div class='progressbar' style='background-color: " + color + "; width: " + barwidth + "px'>&nbsp;</div>"
-	html += "</div>";
-	html += "<table class='progressbartable' width='540'><tr><td>";
-	if (label != null) {
-		html += label + ": ";
-	}
-	if (denominator != 0) {
-		html += numerator + "/" + denominator;
-		html += "</td><td align='right'>";
-		html += Math.round(barwidth/5.4) + "%";
-		html += "</td></tr></table>";
-	}
-	else {
-		html += numerator + "/ (Unknown)";
-		html += "</td></tr></table>";
-	}
-
-	return html;
 }
 
 function updateConsoleIcon(id) {
@@ -331,20 +225,18 @@ function updateConsoleIcon(id) {
 		data: {jobId:JOB_ID, stepId: id}
 	});
 	
-	request.fail(function(jqXHR, textStatus) {
-//		if (jqXHR.responseText) {
-//			alert(jqXHR.responseText);
-//		}
-	});
-	
 	request.done(function(msg) {
 		$j('#stepconsole' + id).html(msg);
 	});
 }
 
-function getErrorDisplay(id, wfStep, params) {
+function getErrorDisplay(id, wfStep, params, status) {
+	var display = 'error';
+	if (status == 'dead') {
+		display = 'dead';
+	}
 	request = $j.ajax({
-		url: '/rosita/workflowStep/error',
+		url: '/rosita/workflowStep/' + display,
 		type: 'POST',
 		data: {jobId:JOB_ID, wfStep: wfStep, params: params}
 	});
@@ -353,7 +245,7 @@ function getErrorDisplay(id, wfStep, params) {
 	});
 	
 	request.done(function(msg) {
-		$j('#stepmessage' + wfStep).html(msg);
+		$j('#stepmessage' + params.stepId).html(msg);
 	});
 }
 
@@ -368,7 +260,8 @@ function getStatusDisplay(id, wfStep, params) {
 	});
 	
 	request.done(function(msg) {
-		$j('#stepmessage' + wfStep).html(msg);
+		$j('#stepmessage' + params.stepId).html(msg);
+		$j('.progressbar').css("backgroundPosition", barPos+"px 0");
 	});
 }
 
@@ -383,51 +276,91 @@ function getPausedDisplay(id, wfStep, params) {
 	});
 	
 	request.done(function(msg) {
-		$j('#stepmessage' + wfStep).html(msg);
+		$j('#stepmessage' + params.stepId).html(msg);
 	});
 }
 
-function showSuccess(id) {
+function showingRunning(id) {
+	return $j('#stepicon'+id).hasClass('running');
+}
+
+function showStatus(id, status) {
 	$j('#stepicon'+id).removeClass();
 	$j('#stepicon'+id).addClass('stepicon');
-	$j('#stepicon'+id).addClass('success');
+	$j('#stepicon'+id).addClass(status);
 	updateConsoleIcon(id);
 }
 
-function showRunning(id) {
-	$j('#stepicon'+id).removeClass();
-	$j('#stepicon'+id).addClass('stepicon');
-	$j('#stepicon'+id).addClass('running');
-	updateConsoleIcon(id);
+// -------------
+
+function updateSchemaPreview() {
+	$j('#schemaPreview').hide();
+	var schemaPath = $j('#schemaPath').val();
+	if (schemaPath == null || schemaPath == "") {
+		schemaPath = $j('#schemaPathDisplay').text();
+	}
+	request = $j.ajax({
+		url: '/rosita/multiClinicDataSource/getSchemaLayout',
+		type: 'POST',
+		data: {schemaFile: schemaPath, type: 'schema'},
+		success: function(msg) {
+			$j('#schemaPreview').html(msg).fadeIn(500);
+			if (msg != "") {
+				$j('#createTablesDiv').fadeIn(500);
+				$j('#schemaFileOK').fadeIn(500);
+			}
+		},
+		error: function(jqXHR, textStatus) {
+			$j('#schemaPreview').html(jqXHR.responseText);
+			$j('#schemaPreview').fadeIn(500);
+			if ($j('#createTablesDiv:visible').size() > 0) { $j('#createTablesDiv').fadeOut(500); }
+			if ($j('#schemaFileOK:visible').size() > 0) { $j('#schemaFileOK').fadeOut(500); }
+		}
+	});
 }
 
-function showFailure(id) {
-	$j('#stepicon'+id).removeClass();
-	$j('#stepicon'+id).addClass('stepicon');
-	$j('#stepicon'+id).addClass('failed');
-	updateConsoleIcon(id);
+function checkEtlFileOK() {
+	var path = $j('#etlRulesFile').val();
+	if (path == null || path == "") {
+		path = $j('#etlRulesFilePathDisplay').text();
+	}
+	request = $j.ajax({
+		url: '/rosita/multiClinicDataSource/checkFileExists',
+		type: 'POST',
+		data: {filename: path, type: 'etlrules'},
+		success: function(msg) {
+			if (msg == "") {
+				$j('#etlRulesFileOK').fadeIn(500);
+			}
+		},
+		error: function(jqXHR, textStatus) {
+			if ($j('#etlRulesFileOK:visible').size() > 0) { $j('#etlRulesFileOK').fadeOut(500); }
+		}
+	});
 }
 
-function showPaused(id) {
-	$j('#stepicon'+id).removeClass();
-	$j('#stepicon'+id).addClass('stepicon');
-	$j('#stepicon'+id).addClass('paused');
-}
+// -------------
 
-function showSkipped(id) {
-	$j('#stepicon'+id).removeClass();
-	$j('#stepicon'+id).addClass('stepicon');
-	$j('#stepicon'+id).addClass('skipped');
+var barPos = 0;
+function barScroll(){
+
+    barPos -= 1;
+    if (barPos <= -24) {
+    	barPos = 0;
+    }
+    $j('.progressbar').css("backgroundPosition", barPos+"px 0");
+
 }
 
 // -------------
 
 function transferFilename(path) {
-	var filename = $j('#filenamePicker').val()
-	if (filename == null || filename == '') {
-		$j('#filename').val('');
-	}
-	else {
-		$j('#filename').val(path + filename);
-	}
+
+    var filename = $j('#filenamePicker').val()
+    if (filename == null || filename == '') {
+        $j('#filename').val('');
+    }
+    else {
+        $j('#filename').val(path + filename);
+    }
 }

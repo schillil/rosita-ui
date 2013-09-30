@@ -28,6 +28,7 @@ class ConceptMapController {
 		
 		def mappings
 		if (all) {
+            response.setHeader('Content-disposition', 'attachment; filename=all_source_values.csv')
 			mappings = ConceptMap.list();
 		}
 		else {
@@ -37,11 +38,11 @@ class ConceptMapController {
 		String lineSeparator = System.getProperty('line.separator')
 		CSVWriter csv = new CSVWriter(response.writer)
 		
-		String[] head = ["Target Table", "Target Column", "Source Value", "Source Vocabulary", "Source Desc"]
+		String[] head = ["Target Table", "Target Column", "Source Value", "Source Vocabulary", "Source Desc", "Data Source ID"]
 		csv.writeNext(head)
 		
 		for (row in mappings) {
-			String[] vals = [row.targetTable, row.targetColumn, row.sourceValue, row.sourceVocabulary, row.sourceDesc]
+			String[] vals = [row.targetTable, row.targetColumn, row.sourceValue, row.sourceVocabulary, row.sourceDesc, row.dataSourceId]
 			csv.writeNext(vals)
 		}
 		csv.close()

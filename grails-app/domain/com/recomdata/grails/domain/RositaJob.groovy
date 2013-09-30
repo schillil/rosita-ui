@@ -19,18 +19,15 @@ package com.recomdata.grails.domain
 class RositaJob {
 	
 	Long id
-	Integer workflowStep
 	Date startDate
 	Date endDate
-	String schemaName
 	String fileName
-	Long totalElements
-	String name
+	String jobName
 	
-	static hasMany = [workflowSteps: WorkflowStep, workflowSignals: WorkflowSignal]
+	static hasMany = [workflowSteps: WorkflowStepInstance, workflowSignals: WorkflowSignal]
 
 	static mapping = {
-		table 'cz.cz_rosita_job'
+		table 'cz.job'
 		version false
 		columns {
 			id column: 'job_id'
@@ -40,11 +37,10 @@ class RositaJob {
     static constraints = {
 		startDate (nullable: true)
 		endDate (nullable: true)
-		totalElements (nullable: true)
-		name (nullable: true)
+		jobName (nullable: true)
     }
 	
-	static transients = ['shortFilename', 'latestWorkflowStep']
+	static transients = ['shortFilename', 'workflowStepNumber']
 	
 	String getShortFilename() {
 		if (fileName) {
@@ -61,14 +57,26 @@ class RositaJob {
 		return "";
 	}
 	
-	WorkflowStep getLatestWorkflowStep() {
-		def wfSteps = WorkflowStep.createCriteria().list() {
+	Integer getWorkflowStepNumber() {
+		def steps = WorkflowStepInstance.createCriteria().list() {
 			eq('job', this)
-			order('startDate', 'desc')
+			order('startDate', 'desc');
 		}
-		if (wfSteps) {
-			return wfSteps[0];
+		if (steps) {
+			return steps[0].stepDescription.stepNumber
 		}
-		return null;
+		return 0
 	}
+	
+	def getWorkflowStep() {
+		def steps = WorkflowStepInstance.createCriteria().list() {
+			eq('job', this)
+			order('startDate', 'desc');
+		}
+		if (steps) {
+			return steps[0]
+		}
+		return 0
+	}
+
 }

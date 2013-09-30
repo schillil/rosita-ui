@@ -13,6 +13,8 @@
 	<table class="striped">
 		<thead>
 			<tr>
+				<th>Clinic ID</th>
+				<th>Clinic</th>
 				<th>Type</th>
 				<th>Object</th>
 				<th>Line</th>
@@ -22,6 +24,8 @@
 		</thead>
 	<g:each in="${errors}" var="error" status="i">
 		<tr>
+			<td>${error.mcDataSource?.id}</td>
+			<td>${error.mcDataSource?.dataSourceName}</td>
 			<td>${error.errorType}</td>
 			<td>${error.sourceType}</td>
 			<td>${error.lineNumber}</td>

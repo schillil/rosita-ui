@@ -20,7 +20,9 @@ import com.recomdata.grails.domain.Requestmap;
 import com.recomdata.grails.domain.Role;
 import com.recomdata.grails.domain.User;
 import com.recomdata.grails.domain.UserGroup;
-import com.recomdata.grails.domain.WorkflowTitle;
+import com.recomdata.grails.domain.WorkflowStepDescription;
+import com.recomdata.grails.domain.MultiClinicDataSource;
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class BootStrap {
 	
@@ -67,7 +69,7 @@ class BootStrap {
 		   if(sadmin==null) {
 			   sadmin= new Person();
 			   sadmin.username="rosita";
-			   sadmin.password =authenticateService.encodePassword("password");
+			   sadmin.password =authenticateService.encodePassword("rosita@2012");
 			   sadmin.email="sadmin@recomdata.com"
 			   sadmin.save(flush:true)
 		   }
@@ -103,24 +105,7 @@ class BootStrap {
 			new Requestmap(configAttribute: "IS_AUTHENTICATED_ANONYMOUSLY", url: "/plugins/*/css/**").save()
 			new Requestmap(configAttribute: "IS_AUTHENTICATED_ANONYMOUSLY", url: "/plugins/*/js/**").save(flush: true)
 		}
-		
-		test = WorkflowTitle.list();
-		if (!test) {
-			//Workflow titles
-			new WorkflowTitle(id:1, title: "Verify Files").save()
-			new WorkflowTitle(id:2, title: "Validate Source Files").save()
-			new WorkflowTitle(id:3, title: "Load Source Tables").save()
-			new WorkflowTitle(id:4, title: "Profile Source Tables").save()
-			new WorkflowTitle(id:5, title: "Validate Source Tables").save()
-			new WorkflowTitle(id:6, title: "Export Unmapped Source Values").save()
-			new WorkflowTitle(id:7, title: "Import Vocabulary Mappings").save()
-			new WorkflowTitle(id:8, title: "Process to OMOP").save()
-			new WorkflowTitle(id:9, title: "Profile OMOP Tables").save()
-			new WorkflowTitle(id:10, title: "Validate OMOP Tables").save()
-			new WorkflowTitle(id:11, title: "Publish to GRID").save()
-			new WorkflowTitle(id:12, title: "Backup Persistent Data").save()
-			new WorkflowTitle(id:13, title: "Complete").save(flush: true)
-		}
+
     }
     def destroy = {
     }

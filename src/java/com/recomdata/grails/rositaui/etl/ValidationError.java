@@ -18,7 +18,6 @@ package com.recomdata.grails.rositaui.etl;
 
 import java.util.Date;
 
-
 public class ValidationError {
 	
 	private String type;

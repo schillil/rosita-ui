@@ -16,82 +16,15 @@
 
 package com.recomdata.grails.rositaui.thread;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.recomdata.grails.rositaui.utils.SignalService;
+public class OmopProfilerRunnable extends AbstractStepRunnable {
 
-public class OmopProfilerRunnable implements Runnable {
-
-	boolean unix = false;
-	String scriptPath = "";
-	Long jobId = 0L;
-	Long stepId = 0L;
+	public Integer getWorkflowStep() { return 9; }
+	public String getCommandName() { return "profileomop"; }
 	
-	String latestOutput = "";
-	int exitCode = -1;
-	
-	public OmopProfilerRunnable() {
-		
-	}
-
-	@Override
-	public void run() {
-		try {
-			exitCode = -1;
-			latestOutput = "";
-			String canonicalPath = "";
-			SignalService sig = SignalService.getInstance();
-			if (!scriptPath.endsWith("/")) {
-				scriptPath = scriptPath + "/";
-			}
-			String suffix = (unix ? ".sh" : ".bat");
-			String scriptfile = "./" + "profileomop" + suffix; //Ensures that a Unix process can start, even if . is not in PATH
-			ProcessBuilder pb = new ProcessBuilder(scriptPath + scriptfile, jobId.toString(), "forui");
-			canonicalPath = new File(scriptPath).getCanonicalPath();
-			pb.directory(new File(canonicalPath));
-			pb.redirectErrorStream(true);
-			Process process = pb.start();
-			BufferedReader r = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			String line;
-			System.out.println("Started process and reading...");
-			sig.sendConsole(stepId, "START");
-			while ((line = r.readLine()) != null) {
-				latestOutput = line;
-				System.out.println(line);
-				sig.sendConsole(stepId, line);
-			}
-			System.out.println("...Finished reading. Process exit code was " + process.waitFor());
-			sig.sendConsole(stepId, "END");
-			exitCode = process.exitValue();
-			sig.sendSignal(jobId, 9, exitCode == 0);
-		}
-		catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
-	}
-	
-	public void setScriptpath(String name) {
-		this.scriptPath = name;
-	}
-	
-	public void setJobId(Long id) {
-		this.jobId = id;
-	}
-	
-	public void setUnix(boolean unix) {
-		this.unix = unix;
-	}
-	
-	public void setStepId(Long id) {
-		this.stepId = id;
-	}
-	
-	public Map<String, Object> getStatus() {
+	public Map<String, Object> getStepStatus() {
 		Map<String, Object> status = new HashMap<String, Object>();
 		String[] output = latestOutput.split("\\|\\|\\|");
 		//Check to see if this is a status message or exception
@@ -103,7 +36,6 @@ public class OmopProfilerRunnable implements Runnable {
 			status.put("messageType", "ERROR");
 			status.put("latestOutput", output[0]);
 		}
-		status.put("exitCode", exitCode);
 		return status;
 	}
 

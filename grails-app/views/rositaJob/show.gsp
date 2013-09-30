@@ -6,65 +6,67 @@
 </head>
 </html>
 <body>
-	<g:javascript>
-	$j = jQuery.noConflict();
+	<g:set var="page" value="job" scope="request"/>
+	<h3>${rositaJobInstance.jobName}</h3>
 	
-	function startValidation() {
-		callAjax('validatorStatus', '/rosita/validator/start', {});
-		callAjaxContinuous('validatorStatus', '/rosita/validator/status', {});
-		UPDATE_VALIDATOR = true;
-	}
+	<table class="striped" width="40%">
+		<thead>
+			<tr>
+				<th>Data sources</th>
+			</tr>
+		</thead>
+		<tbody>
+			<g:each in="${dataSources}" var="dataSource" status="j">
+			<tr>
+				<td><img src="${resource(dir:'images/icons',file:'folder_16.png')}"/> <b>${dataSource.dataSourceName}</b> (${dataSource.dataSourceDirectory})</td>
+			</tr>
+			</g:each>
+		</tbody>
+	</table>
 	
-	function stopValidation() {
-		callAjax('validatorStatus', '/rosita/validator/stop', {});
-		UPDATE_VALIDATOR = false;
-	}
-	
-	</g:javascript>
-
-	<g:set var="alreadyRunning" value="true"/>
-	
-	<h3>${rositaJobInstance.name}</h3>
-	
-	<g:each in="${workflowSteps}" var="step" status="i">
-		<div class="stepstatus" id="stepstatus${i+1}">
-			<%-- If the step has been created (has been successful or this is the current step) --%>
+	<div id="workflowSteps">
+		<g:each in="${workflowSteps}" var="step" status="i">
 			<g:if test="${step}">
-				<div id="stepicon${i+1}" class="stepicon ${step.state}">${workflowTitles[i].title}</div>
-				<div id="stepmessage${i+1}" class="stepmessage">&nbsp;</div>
-				<div id="stepconsole${i+1}" style="text-align: right">
-					<tmpl:consoleLink id="${step.id}"/>
+				<div class="stepstatus" id="stepstatus${step.id}">
+					<%-- If the step has been created (has been successful or this is the current step) --%>
+					<div id="stepicon${step.id}" class="stepicon ${step.state}">${workflowTitles[step.stepDescription.stepNumber-1]?.title}</div>
+					<div id="stepmessage${step.id}" class="stepmessage">
+						<g:if test="${i == workflowSteps.size() - 1}">
+							<img src="${resource([file: 'ajax-loader-flat.gif', dir: 'images/icons'])}"/>
+						</g:if>
+					</div>
+					<div id="stepconsole${step.id}" class="stepconsole">
+						<tmpl:consoleLink id="${step.id}"/>
+					</div>
 				</div>
 			</g:if>
-			<%-- If no first step, provide the Play button at the very start --%>
-			<g:elseif test="${!step && i == 0}">
-				<g:set var="alreadyRunning" value="${false}"/>
-				<div id="stepicon${i+1}" class="stepicon play" onclick="startJob(${rositaJobInstance.id})">${workflowTitles[i].title}</div>
-				<div id="stepmessage${i+1}" class="stepmessage">Click the Play icon to begin the ROSITA process.</div>
-				<div id="stepconsole${i+1}" style="text-align: right">
-				</div>
-			</g:elseif>
-			<g:else>
-				<div id="stepicon${i+1}" class="stepicon">${workflowTitles[i].title}</div>
-				<div id="stepmessage${i+1}" class="stepmessage">&nbsp;</div>
-				<div id="stepconsole${i+1}" style="text-align: right">
-				</div>
-			</g:else>
-		</div>
-	</g:each>
+		</g:each>
+	</div>
+	
+	<div class="bottombar">
 	
 	<div class="bigbutton">
 		<a href="${createLink([action:'index', controller:'rositaJob'])}"><div style="cursor: pointer;" class="stepicon back">Job list</div></a>
 	</div>
 	
-	<div class="bigbutton" id="restartButton">
-		<div id="stepiconrestart" style="cursor: pointer;" class="stepicon failed" onclick="if (confirm('Are you sure you want to cancel this job?')) {cancelJob(${rositaJobInstance.id});}">Cancel job</div>
+	<div class="bigbutton" id="cancelButton">
+		<div id="stepiconcancel" style="cursor: pointer;" class="stepicon failed" onclick="if (confirm('Are you sure you want to cancel this job?')) {cancelJob(${rositaJobInstance.id});}">Cancel job</div>
+	</div>
+	
 	</div>
 	
 	<g:javascript>
+		
+		var workflowTitles = [];
+		var workflowNext = [];
+		<g:each in="${workflowTitles}" var="wt" status="i">
+		workflowTitles[${i+1}] = "${wt.title}";
+		workflowNext[${i+1}] = "${wt.nextStep}";
+		</g:each>
+		
+		$j = jQuery.noConflict();	
+		setInterval(barScroll, 100);
 		JOB_ID = ${rositaJobInstance.id};
-		<g:if test="${alreadyRunning}">
-			startUpdating();
-		</g:if>
+		startUpdating();
 	</g:javascript>
 </body>

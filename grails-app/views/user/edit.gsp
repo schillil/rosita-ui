@@ -4,6 +4,7 @@
 </head>
 
 <body>
+	<g:set var="page" value="changeLogin" scope="request"/>
 	<div id='login'>
 		<div class='inner'>
 			<div class='fheader'>Change login</div>
